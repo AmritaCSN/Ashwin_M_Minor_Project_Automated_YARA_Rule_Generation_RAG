@@ -85,7 +85,7 @@ The specific library dependencies are listed in `requirements.txt`.
 ### **Setup**
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/Ash8848/Ashwin_M_Minor_Project_Automated_YARA_Rule_Generation_RAG.git
+   git clone https://github.com/AmritaCSN/Ashwin_M_Minor_Project_Automated_YARA_Rule_Generation_RAG.git
 
 2. **Install Dependencies**
    ```bash
