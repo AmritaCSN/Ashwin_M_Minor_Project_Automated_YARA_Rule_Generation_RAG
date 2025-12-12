@@ -92,7 +92,7 @@ The specific library dependencies are listed in `requirements.txt`.
    pip install -r requirements.txt
 3. **Configure API Key**
    ```bash
-   API_KEY = "sk-..."   # Or set via:  os.environ['OPENAI_API_KEY']
+   API_KEY = "Your OPEN API Key"   # Or set via:  os.environ['OPENAI_API_KEY']
 4. **Launch Jupyter Notebook**
     ```bash
     jupyter notebook Project.ipynb
