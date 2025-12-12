@@ -1,0 +1,9 @@
+pandas==2.3.3
+scikit-learn==1.7.2
+matplotlib==3.10.7
+seaborn==0.13.2
+yara-python==4.5.4
+openai==2.7.1
+sentence-transformers==5.1.1
+faiss-cpu==1.12.0
+numpy>=1.26.0

@@ -1,0 +1,26 @@
+rule Suspicious_Resource_Based_Injection_TextLog
+{
+    meta:
+        author = "assistant"
+        description = "Detects text-log evidence of native injection that pairs memory allocation with resource extraction APIs (FindResource/LoadResource/LockResource/SizeOfResource). Combines behavioral indicators to avoid triggering on generic .NET or common benign imports."
+        reference_sha256 = "1d4e04fe6e9b4cb7a87f57ebebdf6b66d3eed4bae5d97c4cf36d39641928c723"
+        date = "2025-12-01"
+        confidence = 85
+        tags = ["injection", "resource-loading", "p/invoke", "text-log"]
+
+    strings:
+        $s_virtualalloc    = "VirtualAlloc" nocase
+        $s_virtualfree     = "VirtualFree" nocase
+        $s_findresourcea   = "FindResourceA" nocase
+        $s_loadresource    = "LoadResource" nocase
+        $s_sizeofresource  = "SizeOfResource" nocase
+        $s_lockresource    = "LockResource" nocase
+
+    condition:
+        /*
+         * Require explicit memory-allocation API + LockResource (seen in malware neighbors)
+         * plus at least two resource-related operations (FindResourceA / LoadResource / SizeOfResource / VirtualFree)
+         * This combination focuses on behavioral activity (resource extraction -> memory mapping) and avoids generic imports alone.
+         */
+        $s_virtualalloc and $s_lockresource and (2 of ($s_findresourcea, $s_loadresource, $s_sizeofresource, $s_virtualfree))
+}

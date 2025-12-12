@@ -1,0 +1,19 @@
+Step,Selected_Rule,New_TP,Cumulative_TP,Coverage_Percent
+1,rule Malware_Corexemain_Mscoree_Tex,820,820,27.33
+2,rule VB6_EventSink_Behavioral,297,1117,37.23
+3,rule Detect_New_Malware_e8d88046,289,1406,46.87
+4,rule Detect_New_Malware_692597a4,218,1624,54.13
+5,Detect_Malware_13a74a6c,109,1733,57.77
+6,raw_20251201_223403,96,1829,60.97
+7,rule Detect_New_Malware_18434161,94,1923,64.1
+8,rule Detect_Oleaut_PInvoke_WindowSt,73,1996,66.53
+9,rule Detect_New_Malware_21c6a81b,51,2047,68.23
+10,rule Suspicious_VirtualProtect_Crea,45,2092,69.73
+11,rule Detect_New_Malware_50977f98,35,2127,70.9
+12,rule Detect_New_Malware_cfc94304,32,2159,71.97
+13,rule Detect_New_Malware_1d4e04fe,23,2182,72.73
+14,rule Suspicious_Resource_Update_Wit1,18,2200,73.33
+15,rule Detect_New_Malware_4539d9c1,15,2215,73.83
+16,rule Detect_New_Malware_71eaf532,8,2223,74.1
+17,rule Suspicious_GDIplus_SList_FileE,6,2229,74.3
+18,TEXT_COREXEMAIN_CLUSTER_2760f6,6,2235,74.5

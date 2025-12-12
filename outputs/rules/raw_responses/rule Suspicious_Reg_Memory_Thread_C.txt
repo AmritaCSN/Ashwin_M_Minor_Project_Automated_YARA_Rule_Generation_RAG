@@ -1,0 +1,57 @@
+rule Suspicious_Reg_Memory_Thread_Combo
+{
+    meta:
+        author = "malware-analyst"
+        description = "Text-log detection for a family exhibiting combined behavioral indicators: registry access (persistence), native memory APIs (in-memory allocation/protection), thread creation + file-enumeration, and low-level sync/TLS usage. Combination reduces false positives against benign tooling that calls single categories."
+        sha256_sample = "3bcaf191db8de9ae0926e3cc6c1e64b20187b1acdda8498c7856ac569e125204"
+        date = "2025-12-01"
+        tags = "behavioral,registry,allocation,threading,enumeration"
+
+    strings:
+        /* Registry / persistence related */
+        $reg_query    = "RegQueryValueExA" nocase
+        $reg_open     = "RegOpenKeyExA" nocase
+        $reg_close    = "RegCloseKey" nocase
+
+        /* File / enumeration / persistence */
+        $find_first   = "FindFirstFileA" nocase
+        $find_next    = "FindNextFileA" nocase
+
+        /* Memory / in-memory code manipulation (P/Invoke targets) */
+        $virt_alloc   = "VirtualAlloc" nocase
+        $virt_prot    = "VirtualProtect" nocase
+        $virt_query   = "VirtualQuery" nocase
+        $virt_free    = "VirtualFree" nocase
+
+        /* Threading / remote activity */
+        $create_thread = "CreateThread" nocase
+        $create_thread_a = "CreateThread@" nocase
+
+        /* Low-level sync / atomic / TLS which are less common in benign high-level apps logs */
+        $interlocked_inc = "InterlockedIncrement" nocase
+        $interlocked_dec = "InterlockedDecrement" nocase
+        $tls_get         = "TlsGetValue" nocase
+        $tls_set         = "TlsSetValue" nocase
+        $global_alloc    = "GlobalAlloc" nocase
+
+        /* P/Invoke / dynamic import indicators (used to resolve native APIs) */
+        $get_proc   = "GetProcAddress" nocase
+        $load_lib   = "LoadLibraryA" nocase
+
+        /* I/O helpers often present with persistence or staging */
+        $create_file = "CreateFileA" nocase
+        $write_file  = "WriteFile" nocase
+
+    condition:
+        /* Require combination of behavioral categories to avoid benign-only triggers:
+           - at least one registry indicator (persistence)
+           - at least one native memory API (allocation/protection)
+           - thread creation or enumeration (execution / staging)
+           - at least one low-level sync/TLS/atomic op
+           - dynamic import resolver (GetProcAddress/LoadLibraryA) to suggest P/Invoke */
+        ( any of ($reg_*) ) and
+        ( any of ($virt_*) ) and
+        ( any of ($create_thread, $find_first, $find_next) ) and
+        ( any of ($interlocked_inc, $interlocked_dec, $tls_get, $tls_set, $global_alloc) ) and
+        ( any of ($get_proc, $load_lib) )
+}

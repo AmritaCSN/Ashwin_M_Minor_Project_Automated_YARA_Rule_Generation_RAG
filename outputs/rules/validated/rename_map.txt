@@ -1,0 +1,4 @@
+rule Detect_New_Malware_7bd93093.yar :: Detect_New_Malware_7bd93093 -> Detect_New_Malware_7bd93093_f7c0db
+rule Detect_New_Malware_7bd930931.yar :: Detect_New_Malware_7bd93093 -> Detect_New_Malware_7bd93093_1fad2f
+rule Suspicious_Corexemain_Mscoree_.yar :: Suspicious_Corexemain_Mscoree_TextLog -> Suspicious_Corexemain_Mscoree_TextLog_4071de
+rule Suspicious_Corexemain_Mscoree_1.yar :: Suspicious_Corexemain_Mscoree_TextLog -> Suspicious_Corexemain_Mscoree_TextLog_c197bd

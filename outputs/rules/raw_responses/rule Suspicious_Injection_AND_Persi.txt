@@ -1,0 +1,68 @@
+rule Suspicious_Injection_AND_Persistence_Sequence
+{
+    meta:
+        author = "malware-analyst"
+        description = "Detects behavioral combination seen in the sample: in-memory allocation + process enumeration/remote process access plus registry/privilege or network indicators. Designed for text/log detection using P/Invoke / API name strings. Avoids volatile PE header indicators."
+        sha256_sample = "1e8d93d8748340463d4680cbb5912617f938965f66311c9415364f01ba111aa3"
+        tactic = "Process injection, privilege escalation, persistence/network"
+        date = "2025-12-01"
+
+    strings:
+        /* Memory / injection related */
+        $mem1 = "VirtualAlloc" nocase
+        $mem2 = "VirtualAllocEx" nocase
+        $mem3 = "VirtualFreeEx" nocase
+        $mem4 = "VirtualFree" nocase
+        $mem5 = "WriteProcessMemory" nocase
+        $mem6 = "VirtualAllocExW" nocase
+
+        /* Process enumeration / remote access */
+        $proc1 = "CreateToolhelp32Snapshot" nocase
+        $proc2 = "Process32FirstW" nocase
+        $proc3 = "Process32NextW" nocase
+        $proc4 = "OpenProcess" nocase
+        $proc5 = "CreateProcessAsUserW" nocase
+        $proc6 = "CreateThread" nocase
+
+        /* Registry / persistence related */
+        $reg1  = "RegSetValueExW" nocase
+        $reg2  = "RegCreateKeyExW" nocase
+        $reg3  = "RegOpenKeyExW" nocase
+        $reg4  = "RegQueryValueExW" nocase
+
+        /* Token / privilege manipulation */
+        $tok1 = "AdjustTokenPrivileges" nocase
+        $tok2 = "OpenProcessToken" nocase
+        $tok3 = "DuplicateTokenEx" nocase
+
+        /* Network / C2 related indicators */
+        $net1 = "WSAStartup" nocase
+        $net2 = "socket(" nocase
+        $net3 = "connect(" nocase
+        $net4 = "InternetOpenW" nocase
+        $net5 = "HttpSendRequestW" nocase
+        $net6 = "send(" nocase
+        $net7 = "recv(" nocase
+
+        /* DLL-level hints (used only combined with behavioral indicators; won't trigger by themselves) */
+        $dll_advapi = "advapi32.dll" nocase
+        $dll_kernel = "kernel32.dll" nocase
+        $dll_wsock  = "wsock32.dll" nocase
+
+    condition:
+        /* Must match at least one memory/injection API AND at least one process-management API
+           PLUS at least one persistence/privilege/network indicator to reduce false positives.
+           This forces combination of behavioral indicators rather than generic .NET / DLL names. */
+        ( any of ($mem*) ) and
+        ( any of ($proc*) ) and
+        (
+            any of ($reg*) or
+            any of ($tok*) or
+            any of ($net*)
+        ) and
+
+        /* Defensive: do not trigger on trivial single-token matches (require multiple different behavioral tokens) */
+        ( (#mem1 + #mem2 + #mem3 + #mem4 + #mem5 + #mem6) >= 1 ) and
+        ( (#proc1 + #proc2 + #proc3 + #proc4 + #proc5 + #proc6) >= 1 ) and
+        ( (#reg1 + #reg2 + #reg3 + #reg4 + #tok1 + #tok2 + #tok3 + #net1 + #net2 + #net3 + #net4 + #net5 + #net6 + #net7) >= 1 )
+}

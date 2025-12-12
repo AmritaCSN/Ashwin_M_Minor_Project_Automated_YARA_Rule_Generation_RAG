@@ -1,0 +1,43 @@
+rule Suspicious_Process_Memory_Resource_Manipulator
+{
+    meta:
+        author = "malware-analyst"
+        description = "Detects behavioral combination: process-memory / thread suspension APIs combined with memory-protection/allocation and resource-update/loading calls — uncommon in benign samples and indicative of code-injection / in-memory patching + resource manipulation."
+        sha256_sample = "9fa894084fb99da788390ee40a5dbeb8250ad168385b8b8b802db6f0ba83ebcc"
+        date = "2025-12-04"
+        tags = "behavioral, injection, resource, memory"
+
+    strings:
+        /* Core memory / injection indicators (must-match together) */
+        $s_readproc   = "ReadProcessMemory" nocase
+        $s_suspthr    = "SuspendThread" nocase
+
+        /* Memory allocation / protection / locking helpers (one of these) */
+        $s_valloc     = "VirtualAlloc" nocase
+        $s_vprotect   = "VirtualProtect" nocase
+        $s_vfree      = "VirtualFree" nocase
+        $s_vlock      = "VirtualLock" nocase
+
+        /* Resource / updater indicators (one of these) — persistence or in-binary payload handling */
+        $s_findres    = "FindResourceA" nocase
+        $s_loadres    = "LoadResource" nocase
+        $s_updateres  = "UpdateResourceA" nocase
+        $s_updateres_w = "UpdateResource" nocase
+
+        /* Defensive / debugger-detection helpers (optional, raises confidence) */
+        $s_isdbg      = "IsDebuggerPresent" nocase
+        $s_debugbreak = "DebugBreak" nocase
+
+    condition:
+        /*
+         * Require strong behavioral combination to reduce false positives:
+         *  - both a process-memory read and thread suspension (rare in benign apps),
+         *  - plus at least one memory-allocation/protection API,
+         *  - plus at least one resource-loading/updating API.
+         *
+         * Optionally increase confidence if debugger-detection is present.
+         */
+        all of ($s_readproc, $s_suspthr) and
+        any of ($s_valloc, $s_vprotect, $s_vfree, $s_vlock) and
+        any of ($s_findres, $s_loadres, $s_updateres, $s_updateres_w)
+}

@@ -1,0 +1,37 @@
+rule Suspicious_Resource_Update_With_Memory_Protection_TextLog
+{
+    meta:
+        author = "assistant"
+        description = "Detects text-log entries showing resource-enumeration/update combined with memory protection changes and persistence (CreateMutex). Focuses on behavioral P/Invoke indicators to avoid generic .NET/benign matches."
+        reference_sha256 = "12865d3cf5f64bc049434b136eeeb9e0ebb53d6cd9d29945f082da45929d5fa7"
+        date = "2025-12-01"
+        confidence = 90
+        tags = ["resource-manipulation", "memory-protect", "p/invoke", "persistence", "text-log"]
+
+    strings:
+        /* resource manipulation / update APIs (malicious neighbors show these) */
+        $s_enumres_names_w   = "EnumResourceNamesW" nocase
+        $s_begin_update_w    = "BeginUpdateResourceW" nocase
+        $s_findresource_exw  = "FindResourceExW" nocase
+        $s_findresourcea     = "FindResourceA" nocase
+
+        /* memory-protection / memory-query APIs used in injection / mapping */
+        $s_virtualprotect    = "VirtualProtect" nocase
+        $s_virtualquery      = "VirtualQuery" nocase
+        $s_virtualalloc      = "VirtualAlloc" nocase
+
+        /* persistence / behavioral indicators (less common in benigns here) */
+        $s_createmutexa      = "CreateMutexA" nocase
+        $s_heapsetinfo       = "HeapSetInformation" nocase
+        $s_openeventlog      = "OpenEventLogA" nocase
+
+    condition:
+        /* Require:
+           - at least one resource-enumeration/update API (evidence of embedded resource manipulation)
+           - at least one memory-protection/allocation API (evidence of mapping/execution)
+           - at least one persistence/privilege-related indicator (CreateMutex/HeapSet/OpenEventLog)
+           This combination focuses on malicious behavior and avoids triggering on generic imports alone. */
+        (1 of ($s_enumres_names_w, $s_begin_update_w, $s_findresource_exw, $s_findresourcea))
+        and (1 of ($s_virtualprotect, $s_virtualquery, $s_virtualalloc))
+        and (1 of ($s_createmutexa, $s_heapsetinfo, $s_openeventlog))
+}

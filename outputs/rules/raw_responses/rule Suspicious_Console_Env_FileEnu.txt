@@ -1,0 +1,49 @@
+rule Suspicious_Console_Env_FileEnumeration
+{
+    meta:
+        author = "expert-malware-analyst"
+        description = "Behavioral text-signature: looks for console/window manipulation + pointer-encoding APIs combined with environment modification and file-enumeration — characteristic of utilities that alter environment/persistence and interact with console UI (low false positive aim)."
+        sha256_sample = "5de2bc8202ff2cd5e72a58681d2c4d21d998a61fcccb84f0ef0aef260fb9bb96"
+        date = "2025-12-01"
+
+    strings:
+        /* pointer-encoding / anti-ROP / indirect call helpers */
+        $enc_ptr        = "encodepointer" nocase
+        $dec_ptr        = "decodepointer" nocase
+
+        /* console / UI oriented APIs */
+        $read_console   = "readconsolew" nocase
+        $get_console_w  = "getconsolewindow" nocase
+        $find_window    = "findwindowa" nocase
+        $msg_box        = "messageboxw" nocase
+        $get_console_m  = "getconsolemode" nocase
+        $write_console  = "writeconsolew" nocase
+
+        /* environment / persistence helpers */
+        $set_env_w      = "setenvironmentvariablew" nocase
+        $set_env_a      = "setenvironmentvariablea" nocase
+
+        /* file enumeration / discovery */
+        $findfirst_exw  = "findfirstfileexw" nocase
+        $findfirst_w    = "findfirstfilew" nocase
+        $findnext_w     = "findnextfilew" nocase
+
+        /* debugger / analysis checks (supporting behavioral signal) */
+        $is_debugger    = "isdebuggerpresent" nocase
+
+    condition:
+        /*
+         * Require the pointer-encoding pair (encodepointer + decodepointer) AND
+         * require at least one console/window interaction API AND
+         * require an environment-setting API AND
+         * require a file enumeration API.
+         *
+         * This combination focuses on behavior (console interaction + pointer indirection +
+         * environment modification + file discovery) to lower false positives against benign
+         * binaries that only use a single generic API.
+         */
+        all of ($enc_ptr, $dec_ptr)
+        and 1 of ($read_console, $get_console_w, $find_window, $msg_box, $get_console_m, $write_console)
+        and 1 of ($set_env_w, $set_env_a)
+        and 1 of ($findfirst_exw, $findfirst_w, $findnext_w)
+}

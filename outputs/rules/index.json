@@ -1,0 +1,10 @@
+[
+  {
+    "rule_filename": "MAL_PrivResLoader_Win32_A_20251206_114752.yar",
+    "raw_filename": "raw_20251206_114752.txt",
+    "timestamp": "20251206_114752",
+    "rule_name": "MAL_PrivResLoader_Win32_A",
+    "prompt_preview": "\nYou are an expert malware analyst. Your task is to create a comprehensive YARA rule to detect the new malware sample described below.\n\nGUIDELINES:\n1. **ANALYSIS:** Compare the 'New Malware Sample' with 'Malware Neighbors' to find shared capabilities (APIs, Strings).\n2. **STRICT PROHIBITION (NO OVERFITTING):** You are FORBIDDEN from generating strings based on Volatile PE Headers. These change on ...",
+    "rule_length_chars": 1022
+  }
+]

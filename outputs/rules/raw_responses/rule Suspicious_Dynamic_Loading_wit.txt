@@ -1,0 +1,44 @@
+rule Suspicious_Dynamic_Loading_with_OLE_tuned
+{
+    meta:
+        author = "malware-analyst (tuned)"
+        description = "Tuned: Detect dynamic loading + mandatory OLE/variant token + unusual runtime token. Excludes plain .NET hosts to reduce FPs."
+        sha256_new_sample = "06cde650baa0c78fe43d0088f1948c7654a0330f6f59822332ccf5d90fafb120"
+        date = "2025-12-05"
+        confidence = "High"
+
+    strings:
+        /* dynamic-resolution / PInvoke helpers (need 2 of these) */
+        $s_loadlib      = "loadlibrarya" nocase
+        $s_getproc      = "getprocaddress" nocase
+        $s_getmod       = "getmodulehandlea" nocase
+
+        /* OLE / Variant manipulation (make this mandatory) */
+        $s_variant_ctex = "variantchangetypeex" nocase
+        $s_oleaut32     = "oleaut32.dll" nocase
+
+        /* Unusual runtime / anti-analysis / UI token (require 1 of) */
+        $s_raiseexc     = "raiseexception" nocase
+        $s_getsysbrush  = "getsyscolorbrush" nocase
+
+        /* Helpful anchors / exclusions */
+        $s_kernel32     = "kernel32.dll" nocase
+
+        /* Exclude plain .NET host-only artifacts (reduce FP on managed apps) */
+        $s_mscoree      = "mscoree.dll" nocase
+        $s_corexemain   = "corexemain" nocase
+
+    condition:
+        /*
+         * TUNED LOGIC:
+         *  - Require at least TWO dynamic-resolution tokens (LoadLibrary/GetProcAddress/GetModuleHandle)
+         *  - Require mandatory OLE/variant usage (variantchangetypeex) AND presence of oleaut32.dll
+         *  - Require at least ONE unusual runtime/anti-analysis token (raiseexception or getsyscolorbrush)
+         *  - Exclude obvious .NET-host binaries that would otherwise create FPs
+         */
+        2 of ( $s_loadlib, $s_getproc, $s_getmod ) and
+        $s_variant_ctex and
+        $s_oleaut32 and
+        ( 1 of ( $s_raiseexc, $s_getsysbrush ) ) and
+        not ( $s_mscoree or $s_corexemain )
+}
