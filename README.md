@@ -27,7 +27,6 @@ This context is fed into a **Large Language Model (GPT-4o)** to generate syntax-
 ### **4. Greedy Optimization**
 The generated rules undergo a Greedy Set Cover optimization.
 This algorithm filters out redundant or weak rules, retaining only the minimal subset required to maximize detection coverage.
----
 
 ## **Dependencies**
 
