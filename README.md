@@ -13,7 +13,7 @@ The system ingests a balanced dataset of malware and benign logs. It uses **Sent
 - **Positive Index (Malware)**: For finding similar malware capabilities.
 - **Negative Index (Benign)**: For identifying safe software patterns .
 
-### **2. Semantic Clustering (Efficiency Layer)**
+### **2. Semantic Clustering **
 To avoid redundant processing, the system uses **K-Means Clustering** (k=100) to group thousands of malware samples into distinct families.
 - It calculates the **Geometric Centroid** of each cluster.
 - It selects one **Representative Sample** per cluster to act as the blueprint for rule generation.
