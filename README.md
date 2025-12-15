@@ -11,9 +11,9 @@ The framework processes malware textual metadata to generate detection rules thr
 ### **1. Knowledge Base Construction**
 The system ingests a balanced dataset of malware and benign logs. It uses **Sentence-BERT** to create semantic embeddings, forming two vector indices:
 - **Positive Index (Malware)**: For finding similar malware capabilities.
-- **Negative Index (Benign)**: For identifying safe software patterns (Whitelisting).
+- **Negative Index (Benign)**: For identifying safe software patterns .
 
-### **2. Semantic Clustering (Efficiency Layer)**
+### **2. Semantic Clustering **
 To avoid redundant processing, the system uses **K-Means Clustering** (k=100) to group thousands of malware samples into distinct families.
 - It calculates the **Geometric Centroid** of each cluster.
 - It selects one **Representative Sample** per cluster to act as the blueprint for rule generation.
@@ -22,12 +22,11 @@ To avoid redundant processing, the system uses **K-Means Clustering** (k=100) to
 For each representative target, the system retrieves:
 - **Positive Context**: "Sibling" malware from the same cluster to highlight shared behaviors.
 - **Negative Context**: The nearest "Hard Negative" benign neighbors to explicitly avoid false positives.
-This context is fed into a **Large Language Model (GPT-4o)** to generate syntax-valid YARA rules.
+This context is fed into a **Large Language Model** to generate syntax-valid YARA rules.
 
 ### **4. Greedy Optimization**
 The generated rules undergo a Greedy Set Cover optimization.
 This algorithm filters out redundant or weak rules, retaining only the minimal subset required to maximize detection coverage.
----
 
 ## **Dependencies**
 
